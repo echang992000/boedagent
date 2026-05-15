@@ -1,0 +1,37 @@
+{
+  "problem_summary": "Optimize a single scalar design using Pyro marginal EIG.",
+  "backend": "pyro",
+  "recreate_trajectory": true,
+  "design_variables": [
+    {
+      "name": "design",
+      "lower": -2.0,
+      "upper": 2.0,
+      "initial": 0.25
+    }
+  ],
+  "observation_labels": ["y"],
+  "target_latent_labels": ["theta"],
+  "compute_budget": {
+    "num_outer_samples": 4,
+    "guide_training_steps": 2,
+    "num_optimization_steps": 2,
+    "design_learning_rate": 0.05
+  },
+  "objective": {
+    "name": "expected_information_gain",
+    "estimator": "marginal_eig",
+    "mode": "variational"
+  },
+  "artifacts": {
+    "output_dir": "artifacts",
+    "save_trajectory_plot": true
+  },
+  "model_ref": "boed_agent.demo.pyro_linear:pyro_linear_model",
+  "guide_ref": "boed_agent.demo.pyro_linear:pyro_linear_marginal_guide",
+  "optim_ref": "boed_agent.demo.pyro_linear:make_pyro_adam",
+  "backend_options": {
+    "guide_learning_rate": 0.05,
+    "optimization_strategy": "random_search"
+  }
+}

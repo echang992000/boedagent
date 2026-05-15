@@ -1,0 +1,68 @@
+{
+  "schema_version": "v1",
+  "problem_summary": "Stochastic (Gillespie) SIR model with latent (beta, gamma). Observations are noisy infected counts I(xi_k) at strictly increasing measurement times; BOED picks each measurement time.",
+  "shared": {
+    "latent_spec": {
+      "shape": [2],
+      "labels": ["beta", "gamma"],
+      "notes": "beta is the contact rate (1/time), gamma is the recovery rate (1/time). R0 = beta / gamma is truncated to [0.5, 10] in the prior."
+    },
+    "observation_spec": {
+      "shape": [1],
+      "labels": ["I_t_over_N"],
+      "notes": "Single noisy observation of the infected *fraction* y = I(xi)/N per round. Step-function lookup on one ground-truth Gillespie trajectory, then additive Gaussian noise with sigma = 0.005 in fraction-of-population space (≈0.5% of the population; see examples.cases.sir.simulator.DEFAULT_SIGMA_OBS and sequential_lfiax.TrajectoryCache.observe)."
+    },
+    "design_variables": [
+      {
+        "name": "xi",
+        "lower": 0.0,
+        "upper": 100.0,
+        "description": "Next measurement time, optimised subject to xi > xi_prev via examples.cases.sir.monotone.next_xi_from_raw."
+      }
+    ]
+  },
+  "hints": {
+    "prior_notes": "log-normal priors with log(beta) ~ N(log 0.3, 0.5^2), log(gamma) ~ N(log 0.1, 0.5^2), truncated to R0 in [0.5, 10].",
+    "notes": "This bundle is designed for the sequential BOED driver under examples/agent/sir_sequential_agent.py."
+  },
+  "data": {
+    "observed_data_ref": null,
+    "observed_data_summary": "No fixed dataset; one ground-truth trajectory is sampled per run from simulator.simulate_sir_trajectory(theta_true).",
+    "sources": [
+      "examples/cases/sir/simulator.py",
+      "examples/cases/sir/prior.py",
+      "examples/cases/sir/sequential_lfiax.py"
+    ]
+  },
+  "candidates": [
+    {
+      "name": "sir_gillespie_lfiax",
+      "kind": "simulator",
+      "description": "Stochastic Gillespie SIR with LFIAX-style likelihood-free sequential BOED.",
+      "simulator_ref": "examples.cases.sir.simulator:simulate",
+      "prior_sampler_ref": "examples.cases.sir.prior:sample_prior",
+      "differentiable": false,
+      "target_latent_labels": ["beta", "gamma"],
+      "observation_labels": ["I_t"],
+      "backend": "lfiax",
+      "backend_options": {
+        "design_mode": "point",
+        "xi_mu_init": [20.0],
+        "xi_stddev_init": [5.0],
+        "xi_stddev_min": 0.01
+      },
+      "metadata": {
+        "theta_format": "length-2 vector [beta, gamma]; both positive, log-normal prior truncated on R0.",
+        "monotone_reparam": "examples.cases.sir.monotone:next_xi_from_raw"
+      }
+    }
+  ],
+  "metadata": {
+    "t_max": 100.0,
+    "population": 500,
+    "I0": 2,
+    "sigma_obs": 0.005,
+    "sigma_obs_space": "fraction",
+    "notes": "Defaults mirror examples.cases.sir.simulator (DEFAULT_N=500, DEFAULT_I0=2, DEFAULT_SIGMA_OBS=0.005 in fraction-of-population space); Ivanova et al. (2021) / Zaballa & Hui (2025) setup."
+  }
+}

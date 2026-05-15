@@ -1,0 +1,44 @@
+{
+  "problem_summary": "Scalar linear-Gaussian BOED with the LFIAX backend using the black-box annealed design-distribution path.",
+  "backend": "lfiax",
+  "simulator_ref": "boed_agent.demo.lfiax_linear:simulator",
+  "prior_sampler_ref": "boed_agent.demo.lfiax_linear:prior",
+  "differentiable": false,
+  "design_variables": [
+    {
+      "name": "xi",
+      "lower": -2.0,
+      "upper": 2.0
+    }
+  ],
+  "observation_labels": ["y"],
+  "target_latent_labels": ["theta"],
+  "compute_budget": {
+    "num_outer_samples": 16,
+    "num_inner_samples": 4,
+    "num_optimization_steps": 8,
+    "design_learning_rate": 0.02,
+    "flow_learning_rate": 0.001
+  },
+  "objective": {
+    "name": "expected_information_gain",
+    "estimator": "lf_pce_eig_scan",
+    "estimator_kwargs": {
+      "lam": 0.5
+    }
+  },
+  "backend_options": {
+    "design_mode": "distribution",
+    "xi_mu_init": [0.0],
+    "xi_stddev_init": [1.0],
+    "xi_stddev_min": 0.01,
+    "end_sigma": 0.05,
+    "decay_rate": 10.0
+  },
+  "surrogate": {
+    "checkpoint_filename": "linear_distribution_likelihood.pkl"
+  },
+  "artifacts": {
+    "output_dir": "artifacts"
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "schema_version": "v1",
+  "problem_summary": "Sequential BOED on y = a*xi + b + Normal(0, sigma_obs) with vague Gaussian priors on slope and intercept. Pyro backend (explicit simulator).",
+  "shared": {
+    "latent_spec": {
+      "shape": [2],
+      "labels": ["a", "b"],
+      "notes": "Slope a and intercept b; vague Normal(0, 3) priors by default."
+    },
+    "observation_spec": {
+      "shape": [1],
+      "labels": ["y"],
+      "notes": "Single scalar observation per round; additive Gaussian noise with sigma=0.1."
+    },
+    "design_variables": [
+      {
+        "name": "xi",
+        "lower": -1.0,
+        "upper": 1.0,
+        "description": "Design coordinate; BOED picks the most informative xi per round."
+      }
+    ]
+  },
+  "hints": {
+    "prior_notes": "Intentionally vague Gaussian priors — no prior elicitation. The point is to demonstrate the sequential loop, not the prior."
+  },
+  "candidates": [
+    {
+      "name": "pyro_linreg",
+      "kind": "explicit",
+      "description": "Explicit Pyro model with posterior_eig and an amortised bivariate-normal posterior guide over (a, b) | y. Exact variational family for this linear-Gaussian model, so the posterior EIG estimator is tight in the asymptotic limit.",
+      "model_ref": "examples.cases.linreg_sequential.model:model",
+      "target_latent_labels": ["a", "b"],
+      "observation_labels": ["y"],
+      "backend": "pyro",
+      "backend_options": {
+        "estimator": "posterior_eig",
+        "guide": "AmortisedBivariateNormal(a, b | y)",
+        "legacy_estimator": "marginal_eig + AutoDiagonalNormal (kept in optimize_design_pyro_marginal)"
+      },
+      "metadata": {
+        "fallback_path": "examples.cases.linreg_sequential.model:GaussianLinearModel — numpy conjugate closed-form, used when pyro-ppl is not installed."
+      }
+    }
+  ],
+  "metadata": {
+    "sigma_obs": 0.1,
+    "theta_true_default": [1.5, -0.2]
+  }
+}

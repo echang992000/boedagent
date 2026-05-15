@@ -1,0 +1,177 @@
+{
+  "schema_version": "v1",
+  "problem_summary": "BMP4 single-ligand gradient response across four cell lines, with BOED-ready shared context but no execution candidate selected yet.",
+  "shared": {
+    "latent_spec": {
+      "labels": [],
+      "notes": "The shared bundle keeps latent structure abstract. Family-specific latent parameterizations are defined in the local Hill and multireceptor Pyro modules."
+    },
+    "observation_spec": {
+      "shape": [
+        11
+      ],
+      "labels": [
+        "pSmad_response_over_bmp4_gradient"
+      ],
+      "notes": "Each dose-response trajectory contains 11 BMP4 conditions for one cell line."
+    },
+    "design_variables": [
+      {
+        "name": "bmp4_concentration",
+        "lower": 0.0,
+        "upper": 3200.0,
+        "description": "BMP4 dose level in ng/mL."
+      }
+    ]
+  },
+  "hints": {
+    "notes": "This bundle captures shared BMP4 context, data locations, literature sources, and candidate family names. Execution wiring for literature-informed fitting and BOED is handled locally by examples/agent/bmp4_gradient_agent.py and the nearby BMP4 helper modules."
+  },
+  "data": {
+    "observed_data_ref": "data/bmp4_data/bmp4_gradient_data.npz",
+    "observed_data_summary": "Normalized and raw BMP4 gradient observations for NMuMG, BMPR2_KD, ACVR1_KD, and BMPR1A_KD.",
+    "sources": [
+      "data/bmp4_data/BMP4_GRADIENT_README.md",
+      "examples/agent/local_corpus/bmp4_gradient"
+    ]
+  },
+  "candidates": [
+    {
+      "name": "hill_differentiable",
+      "kind": "simulator",
+      "description": "Differentiable Hill dose-response candidate.",
+      "simulator_ref": "examples.cases.bmp4_gradient.simulators.differentiable.hill:simulate",
+      "differentiable": true,
+      "target_latent_labels": [
+        "bottom",
+        "top",
+        "ec50",
+        "hill_n"
+      ],
+      "metadata": {
+        "theta_format": "Either a mapping with keys bottom, top, ec50, hill_n or a flat length-4 vector in that order."
+      }
+    },
+    {
+      "name": "multireceptor_differentiable",
+      "kind": "simulator",
+      "description": "Differentiable multireceptor dose-response candidate.",
+      "simulator_ref": "examples.cases.bmp4_gradient.simulators.differentiable.multireceptor:simulate",
+      "differentiable": true,
+      "target_latent_labels": [
+        "kd",
+        "receptor_abundance",
+        "receptor_weight",
+        "top",
+        "bottom",
+        "s50",
+        "response_hill"
+      ],
+      "metadata": {
+        "theta_format": "A mapping with keys kd, receptor_abundance, receptor_weight, top, bottom, s50, response_hill."
+      }
+    },
+    {
+      "name": "multireceptor_hierarchical_pyro",
+      "kind": "likelihood",
+      "description": "Joint hierarchical Pyro multireceptor model with shared receptor parameters, cell-line-specific abundances, qPCR observation layer, and response readout.",
+      "pyro_ref": "examples.cases.bmp4_gradient.pyro.multireceptor_hierarchical:make_fit_model",
+      "differentiable": true,
+      "target_latent_labels": [
+        "log_kd",
+        "log_weight",
+        "base_log_R",
+        "qpcr_intercept",
+        "qpcr_slope",
+        "sigma_q",
+        "sigma_R",
+        "log_s50",
+        "response_hill",
+        "bottom",
+        "top",
+        "sigma_y",
+        "log_R"
+      ],
+      "metadata": {
+        "execution_mode": "joint_cell_lines",
+        "theta_format": "Joint Pyro latent state across receptors and selected cell lines."
+      }
+    },
+    {
+      "name": "promisys_onestep_lfiax",
+      "kind": "simulator",
+      "description": "Simulator-based promisys one-step trimeric BMP4 model with one ligand, two type I receptors, and three type II receptors.",
+      "simulator_ref": "examples.cases.bmp4_gradient.promisys_onestep:simulate_promisys_onestep_raw",
+      "differentiable": false,
+      "target_latent_labels": [
+        "K_BMP4_ACVR1_ACVR2A",
+        "K_BMP4_ACVR1_ACVR2B",
+        "K_BMP4_ACVR1_BMPR2",
+        "K_BMP4_BMPR1A_ACVR2A",
+        "K_BMP4_BMPR1A_ACVR2B",
+        "K_BMP4_BMPR1A_BMPR2",
+        "e_BMP4_ACVR1_ACVR2A",
+        "e_BMP4_ACVR1_ACVR2B",
+        "e_BMP4_ACVR1_BMPR2",
+        "e_BMP4_BMPR1A_ACVR2A",
+        "e_BMP4_BMPR1A_ACVR2B",
+        "e_BMP4_BMPR1A_BMPR2"
+      ],
+      "metadata": {
+        "execution_mode": "promisys_onestep",
+        "receptor_order": [
+          "ACVR1",
+          "BMPR1A",
+          "ACVR2A",
+          "ACVR2B",
+          "BMPR2"
+        ],
+        "theta_format": "Flat length-12 normalized vector: six one-step affinities followed by six phosphorylation efficiencies, ordered by type I receptor then type II receptor."
+      }
+    },
+    {
+      "name": "promisys_twostep_lfiax",
+      "kind": "simulator",
+      "description": "Simulator-based promisys two-step trimeric BMP4 model with one ligand, two type I receptors, and three type II receptors.",
+      "simulator_ref": "examples.cases.bmp4_gradient.promisys_twostep:simulate_promisys_twostep_raw",
+      "differentiable": false,
+      "target_latent_labels": [
+        "K_BMP4_ACVR1",
+        "K_BMP4_BMPR1A",
+        "K_BMP4_ACVR1_ACVR2A",
+        "K_BMP4_ACVR1_ACVR2B",
+        "K_BMP4_ACVR1_BMPR2",
+        "K_BMP4_BMPR1A_ACVR2A",
+        "K_BMP4_BMPR1A_ACVR2B",
+        "K_BMP4_BMPR1A_BMPR2",
+        "e_BMP4_ACVR1_ACVR2A",
+        "e_BMP4_ACVR1_ACVR2B",
+        "e_BMP4_ACVR1_BMPR2",
+        "e_BMP4_BMPR1A_ACVR2A",
+        "e_BMP4_BMPR1A_ACVR2B",
+        "e_BMP4_BMPR1A_BMPR2",
+        "sigma_y_norm"
+      ],
+      "metadata": {
+        "execution_mode": "promisys_twostep",
+        "receptor_order": [
+          "ACVR1",
+          "BMPR1A",
+          "ACVR2A",
+          "ACVR2B",
+          "BMPR2"
+        ],
+        "theta_format": "Flat length-15 normalized vector: two dimer affinities, six trimer affinities, six phosphorylation efficiencies, and one normalized observation-noise scale."
+      }
+    }
+  ],
+  "metadata": {
+    "cell_lines": [
+      "NMuMG",
+      "BMPR2_KD",
+      "ACVR1_KD",
+      "BMPR1A_KD"
+    ],
+    "local_corpus_dir": "examples/agent/local_corpus/bmp4_gradient"
+  }
+}

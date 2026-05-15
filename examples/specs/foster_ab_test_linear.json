@@ -1,0 +1,59 @@
+{
+  "problem_summary": "Foster et al. A/B testing benchmark with a Gaussian linear model and a discrete candidate grid over the A-group allocation.",
+  "backend": "pyro",
+  "design_variables": [
+    {
+      "name": "group_a_size",
+      "lower": 0.0,
+      "upper": 10.0,
+      "initial": 5.0,
+      "description": "Number of participants assigned to group A out of 10."
+    }
+  ],
+  "observation_labels": [
+    "y"
+  ],
+  "target_latent_labels": [
+    "w"
+  ],
+  "compute_budget": {
+    "num_outer_samples": 10,
+    "guide_training_steps": 2500,
+    "num_optimization_steps": 11
+  },
+  "objective": {
+    "name": "expected_information_gain",
+    "estimator": "posterior_eig",
+    "mode": "variational"
+  },
+  "artifacts": {
+    "output_dir": "artifacts/foster_variational"
+  },
+  "backend_options": {
+    "guide_learning_rate": 0.05,
+    "optimization_strategy": "candidate_grid",
+    "candidate_designs": [
+      [0.0],
+      [1.0],
+      [2.0],
+      [3.0],
+      [4.0],
+      [5.0],
+      [6.0],
+      [7.0],
+      [8.0],
+      [9.0],
+      [10.0]
+    ],
+    "final_num_samples": 500
+  },
+  "metadata": {
+    "paper_title": "Variational Bayesian Optimal Experimental Design",
+    "paper_url": "https://papers.nips.cc/paper_files/paper/2019/file/d55cbf210f175f4a37916eafe6c04f0d-Paper.pdf",
+    "reproduction_url": "https://github.com/ae-foster/pyro/blob/vboed-reproduce/NEURIPS.md",
+    "paper_experiment": "ab_test_linear"
+  },
+  "model_ref": "boed_agent.demo.foster_variational:foster_ab_test_linear_model",
+  "guide_ref": "boed_agent.demo.foster_variational:foster_ab_test_linear_posterior_guide",
+  "optim_ref": "boed_agent.demo.foster_variational:make_foster_paper_adam"
+}

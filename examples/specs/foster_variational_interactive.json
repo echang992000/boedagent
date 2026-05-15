@@ -1,0 +1,11 @@
+{
+  "metadata": {
+    "demo_template": "foster_variational",
+    "paper_title": "Variational Bayesian Optimal Experimental Design",
+    "paper_url": "https://papers.nips.cc/paper_files/paper/2019/file/d55cbf210f175f4a37916eafe6c04f0d-Paper.pdf",
+    "reproduction_url": "https://github.com/ae-foster/pyro/blob/vboed-reproduce/NEURIPS.md"
+  },
+  "artifacts": {
+    "output_dir": "artifacts/foster_variational"
+  }
+}

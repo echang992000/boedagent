@@ -1,0 +1,39 @@
+{
+  "posterior_net": {
+    "hidden_dim": 96,
+    "layers": 2,
+    "activation": "gelu",
+    "batch_size": 64,
+    "learning_rate": 0.001,
+    "steps": 200,
+    "simulations": 128,
+    "posterior_samples": 64
+  },
+  "flow": {
+    "num_layers": 4,
+    "hidden_sizes": [96, 96],
+    "num_bins": 8,
+    "activation": "gelu",
+    "use_resnet": true,
+    "dropout_rate": 0.0,
+    "standardize_theta": false
+  },
+  "objective": {
+    "fit_steps": 50,
+    "flow_learning_rate": 0.02,
+    "design_learning_rate": 0.05,
+    "eig_outer_samples": 32,
+    "eig_inner_samples": 5,
+    "infonce_lambda": 0.5,
+    "design_dist_init_std": 0.3,
+    "design_temperature_scale": 1.0,
+    "early_stopping_patience": 10,
+    "early_stopping_min_delta": 0.0
+  },
+  "mcmc": {
+    "warmup": 50,
+    "samples": 64,
+    "proposal_scale": 0.03,
+    "prior_std_floor": 0.03
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "problem_summary": "Simulator-only BOED setup that still needs clarification.",
+  "backend": "lfiax",
+  "simulator_ref": "my_project.simulators:simulate_experiment",
+  "differentiable": false,
+  "objective": {
+    "name": "expected_information_gain",
+    "estimator": "lf_pce_eig"
+  },
+  "artifacts": {
+    "output_dir": "artifacts"
+  }
+}
