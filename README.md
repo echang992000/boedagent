@@ -21,6 +21,26 @@ Capabilities:
 - a clarification planner that asks for missing BOED inputs before execution
 - a thin CLI for validation, execution, backend inspection, and interactive chat
 
+## Figures
+
+### Figure 1 — BOED-Agent workflow
+
+![BOED-Agent workflow](figures/figure-01.png)
+
+A problem bundle is parsed, enriched with literature-informed priors, dispatched to a backend, and run in a sequential design loop.
+
+### Figure 2 — Interactive pipeline
+
+![Interactive pipeline](figures/figure-02.png)
+
+The interactive pipeline that wraps every run. A sparse problem bundle is normalized into an executable `ExperimentSpec`; missing fields trigger numbered clarification turns; literature-informed priors and a backend routing decision are dispatched into the chosen BOED estimator, with reasoning traces and run artifacts written back to disk for audit.
+
+### Figure 3 — Flat vs. literature-informed prior
+
+![Flat vs. literature-informed prior](figures/figure-03.png)
+
+EIG optimization under a flat, uninformative prior versus one based on agentic literature review. Both reach comparable total EIG within a small budget, but the literature-informed run chooses a more diverse set of cell-line and BMP4-dose experiments.
+
 ## High-level agent API
 
 ```python
